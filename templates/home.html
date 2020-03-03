@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<header>
+
+</header>
+
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <title>FloodAI</title>
+    <!-- <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"> -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+
+
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {
+            'packages': ['line']
+        });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('number', 'Date');
+            data.addColumn('number', 'True Discharge');
+            data.addColumn('number', 'EPS 30-day Forecast');
+            data.addColumn('number', 'LSTM 30-day Forecast');
+
+            data.addRows([
+                [1, 37.8, 80.8, 41.8],
+                [2, 30.9, 69.5, 32.4],
+                [3, 25.4, 57, 25.7],
+                [4, 11.7, 18.8, 10.5],
+                [5, 11.9, 17.6, 10.4],
+                [6, 8.8, 13.6, 7.7],
+                [7, 7.6, 12.3, 9.6],
+                [8, 12.3, 29.2, 10.6],
+                [9, 16.9, 42.9, 14.8],
+                [10, 12.8, 30.9, 11.6],
+                [11, 5.3, 7.9, 4.7],
+                [12, 6.6, 8.4, 5.2],
+                [13, 4.8, 6.3, 3.6],
+                [14, 4.2, 6.2, 3.4]
+            ]);
+
+            var options = {
+                chart: {
+                    title: 'Plot of Discharge Values over time',
+                    subtitle: 'in cumecs (m^3/s)'
+                },
+                width: 1300,
+                height: 550
+            };
+
+            var chart = new google.charts.Line(document.getElementById('chart_div'));
+
+            chart.draw(data, google.charts.Line.convertOptions(options));
+        };
+    </script>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <div class="choose-date">
+        <input class="cal" type="date" value="2013-05-01" min="2013-01-22" max="2020-03-08" id="exactDate"
+            onchange="updateTime(this.value)">
+        <input class="slider" type="range" min="-7" max="7" value="0" id="nbDaysFuture"
+            onchange="updateRangeValue(this.value); updateTime(document.getElementById('exactDate').value)">
+    </div>
+    <div class="sidebar">
+
+        <div class="sidebar-header">
+            <h1>FloodAI</h1>
+            <p>Forecasting floods using AI technology.</p>
+        </div>
+
+        <div class="sidebar-search">
+            <input type="text" id="search" placeholder="Type in a location..." onchange="updateLocation(this.value)">
+        </div>
+
+        <div id="nb-cases" class="panel nb-days" onclick="animatePanel2()">
+            <h2>River Discharge of Area</h2>
+            <h1 style="width: 100%; margin: auto; margin-top: 30px; font-size: 20px;" id="numberOfDischarge">
+                <i>Search for an area for more information!</i></h1>
+
+            <p id="plot-option" style="margin-left: 200px; margin-bottom: 100px;">> View plot</p>
+        </div>
+
+        <div class="panel nb-cases">
+            <h2>Risk of Flooding in Area</h2>
+            <h1 style="width: 100%; margin: auto; margin-top: 30px; font-size: 20px;" id="forecast-day">
+                <i>Search for an area for more information!</i></h1>
+        </div>
+
+        <div class="panel tips" id="panel" onclick="animatePanel()">
+            <h2>Safety recommendations</h2>
+            <h3 id="risk-level"></h3>
+            <p id="safety-tips">Type in a location to get the best safety recommendations based on your region.</p>
+        </div>
+
+    </div>
+
+
+
+    <div id="open-tips" class="panel open-tips">
+        <h1>Safety recommendations</h1>
+        <h3>Risk level is HIGH</h3>
+        <div class="x-div" onclick="closePanel()">
+            <h1>x</h1>
+        </div>
+
+        <div>
+            <h2>If a flood is forecasted</h2>
+
+            <ol>
+                <li>Turn off basement furnaces and the outside gas valve.</li>
+                <li>Take special precautions to safeguard electrical, natural gas or propane heating equipment.</li>
+                <li>If there is enough time, consult your electricity or fuel supplier for instructions on how to
+                    proceed.</li>
+                <li>>Shut off the electricity only if flooding has not yet begun and the area around the fuse box is
+                    completely dry. Stand to the side of the breaker panel and look away from the panel when switching
+                    the power off. Have a flashlight with you.</li>
+            </ol>
+
+            <h2>If flooding is imminent</h2>
+
+            <ol>
+                <li>Move furniture, electrical appliances and other belongings to floors above ground level.
+                </li>
+                <li>Remove toxic substances such as pesticides and insecticides from the flood area to prevent
+                    pollution.
+                </li>
+
+                <li>Remove toilet bowls and plug basement sewer drains and toilet connections with a wooden stopper.
+                </li>
+
+                <li>Disconnect eavestroughs if they are connected to the house sewer.
+                </li>
+                <li>In some cases, homes may be protected with sandbags or polyethylene barriers. Follow instructions
+                    from local emergency officials.
+                </li>
+                <li>Do NOT attempt to shut off electricity if any water is present. Water and live electrical wires can
+                    be lethal. Leave your home immediately and do not return until authorities indicate it is safe to do
+                    so.
+                </li>
+
+            </ol>
+
+            <h1>To learn more about this issue, please consult the following links:</h1>
+
+
+            <ul>
+                <li><a target="_blank" href="https://www.who.int/health-topics/coronavirus">World Health
+                        Organization</a></li>
+                <li><a target="_blank"
+                        href="https://www.gov.uk/guidance/coronavirus-covid-19-information-for-the-public">UK
+                        Government</a></li>
+                <li><a target="_blank"
+                        href="https://www.theguardian.com/world/2020/mar/01/what-is-coronavirus-and-what-should-i-do-symptoms">Coronavirus
+                        Symptoms</li>
+                <li><a target="_blank"
+                        href="https://www.canada.ca/en/public-health/services/diseases/2019-novel-coronavirus-infection.html">Canada
+                        Public Health Services</a></li>
+                <li><a target="_blank" href="https://news.un.org/en/story/2020/02/1058381">United Nations Article</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="open-nb-cases" class="panel open-nb-cases">
+        <div class="x-div" onclick="closePanel2()">
+            <h1>x</h1>
+        </div>
+        <div class="graph-container" style="position:relative; width: 90%; top: 100px;">
+            <div id="chart_div"></div>
+        </div>
+    </div>
+
+    <!-- Recommendations array -->
+    <script>
+        var recentLocation = "";
+    </script>
+    <!-- Script to get location -->
+    <script>
+        var input_location = document.getElementById("search").value;
+        document.getElementById('test').innerHTML = input_location;
+    </script>
+
+    <!-- Animate panel -->
+    <script>
+        function animatePanel() {
+            document.getElementById("open-tips").style.display = "block";
+        }
+
+        function closePanel() {
+            document.getElementById("open-tips").style.display = "none";
+        }
+    </script>
+    <script>
+        function animatePanel2() {
+            document.getElementById("open-nb-cases").style.display = "block";
+        }
+
+        function closePanel2() {
+            document.getElementById("open-nb-cases").style.display = "none";
+        }
+    </script>
+
+
+    <!-- Script to get value from range slider -->
+
+    <script>
+        function updateRangeValue(days) {
+
+            var parts = document.getElementById("exactDate").value.split('-');
+            var currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+
+            currentDate.setDate(currentDate.getDate() + Number(days));
+            console.log(currentDate.getDate());
+
+            currentDate = currentDate.getFullYear() + '-' + ("0" + (currentDate.getMonth() + 1)).slice(-2) +
+                '-' + ("0" + currentDate.getDate()).slice(-2);
+
+            console.log(currentDate);
+
+
+            document.getElementById("exactDate").value = currentDate;
+
+            document.getElementById("nbDaysFuture").value = 0;
+
+
+
+
+
+
+        }
+    </script>
+
+
+
+    <script>
+        var listOfDischarge = [];
+        var listOfLatCoordinates = [];
+        var listOfLongCoordinates = [];
+
+
+        var map;
+
+        function initMap() {
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: {
+                    lat: 53.598130,
+                    lng: -102.648983
+                },
+                disableDefaultUI: true,
+                styles:
+
+                    [{
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#f5f5f5"
+                            }]
+                        },
+                        {
+                            "elementType": "labels",
+                            "stylers": [{
+                                "visibility": "2"
+                            }]
+                        },
+                        {
+                            "elementType": "labels.icon",
+                            "stylers": [{
+                                "visibility": "off"
+                            }]
+                        },
+                        {
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#616161"
+                            }]
+                        },
+                        {
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{
+                                "color": "#f5f5f5"
+                            }]
+                        },
+                        {
+                            "featureType": "administrative.land_parcel",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#bdbdbd"
+                            }]
+                        },
+                        {
+                            "featureType": "administrative.neighborhood",
+                            "stylers": [{
+                                "visibility": "off"
+                            }]
+                        },
+                        {
+                            "featureType": "poi",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#eeeeee"
+                            }]
+                        },
+                        {
+                            "featureType": "poi",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#757575"
+                            }]
+                        },
+                        {
+                            "featureType": "poi.park",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#e5e5e5"
+                            }]
+                        },
+                        {
+                            "featureType": "poi.park",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#9e9e9e"
+                            }]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#ffffff"
+                            }]
+                        },
+                        {
+                            "featureType": "road.arterial",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#757575"
+                            }]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#dadada"
+                            }]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#616161"
+                            }]
+                        },
+                        {
+                            "featureType": "road.local",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#9e9e9e"
+                            }]
+                        },
+                        {
+                            "featureType": "transit.line",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#e5e5e5"
+                            }]
+                        },
+                        {
+                            "featureType": "transit.station",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#eeeeee"
+                            }]
+                        },
+                        {
+                            "featureType": "water",
+                            "elementType": "geometry",
+                            "stylers": [{
+                                "color": "#c9c9c9"
+                            }]
+                        },
+                        {
+                            "featureType": "water",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{
+                                "color": "#9e9e9e"
+                            }]
+                        }
+                    ]
+            });
+
+            // Create a <script> tag and obtain the data from the google cloud bucket.
+            var script = document.createElement('script');
+
+            var selectDate = document.getElementById('exactDate');
+
+
+            script.src = 'https://storage.cloud.google.com/discharge-history/20year/05-01-2013.geojsonp';
+
+            document.getElementsByTagName('head')[0].appendChild(script);
+
+            map.data.setStyle(function (feature) {
+                var discharge = feature.getProperty('dis24');
+
+                listOfDischarge.push(discharge)
+
+                var latCoordinates = feature.getProperty("lat");
+
+                listOfLatCoordinates.push(latCoordinates);
+                var longCoordinates = feature.getProperty("lon");
+                listOfLongCoordinates.push(longCoordinates);
+
+
+                return {
+                    icon: getCircle(discharge)
+                };
+
+
+            });
+        }
+
+        function getCircle(discharge) {
+
+            var discharge_circle = discharge
+
+            if (discharge > 10000) {
+                discharge_circle = 10000;
+            } else if (discharge < 5000) {
+                discharge_circle = 5000;
+            };
+
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: 'blue',
+                fillOpacity: 0.5,
+                scale: discharge_circle / 1500,
+                strokeColor: 'white',
+                strokeWeight: .00005
+            };
+        }
+
+        function eqfeed_callback(results) {
+            map.data.addGeoJson(results);
+        }
+
+
+        function updateTime(value) {
+
+            listOfDischarge = [];
+            listOfLatCoordinates = [];
+            listOfLongCoordinates = [];
+
+            map.data.forEach(function (feature) {
+                map.data.remove(feature);
+
+            });
+
+            time = value.slice(5, 7) + '-' + value.slice(8, 10) + '-' + value.slice(0, 4);
+
+            console.log(String(time))
+
+            var script = document.createElement('script');
+
+            script.src = 'https://storage.cloud.google.com/discharge-history/20year/' + String(time) + '.geojsonp';
+
+            document.getElementsByTagName('head')[0].appendChild(script);
+
+            map.data.setStyle(function (feature) {
+                var discharge = feature.getProperty('dis24');
+
+                listOfDischarge.push(discharge);
+
+                var latCoordinates = feature.getProperty("lat");
+
+                listOfLatCoordinates.push(latCoordinates);
+                var longCoordinates = feature.getProperty("lon");
+                listOfLongCoordinates.push(longCoordinates);
+
+                return {
+                    icon: getCircle(discharge)
+                };
+
+
+            });
+
+
+            viewBounds = map.getBounds();
+
+
+            lowerLatBound = viewBounds["Za"]["i"];
+            upperLatBound = viewBounds["Za"]["j"];
+            lowerLonBound = viewBounds["Ua"]["i"];
+            upperLonBound = viewBounds["Ua"]["j"];
+
+
+            var changed = false;
+
+            google.maps.event.trigger(map, 'resize');
+
+
+        }
+
+        function updateLocation(val) {
+            recentLocation = String(val);
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", ("https://maps.googleapis.com/maps/api/geocode/json?address=" + val +
+                "&key=AIzaSyAzkhf-ORo89KJxvc_A6rscoEbO3d-ByQM"), false); // false for synchronous request
+            xmlHttp.send(null);
+            response = JSON.parse(xmlHttp.responseText);
+            var longitude = response["results"][0]['geometry']['location']['lng'];
+            var latitude = response["results"][0]['geometry']['location']['lat'];
+
+            //These lines of codes do not work well for now 
+            // var xmlHttp1 = new XMLHttpRequest();
+            // xmlHttp1.open("GET", ("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + String(latitude) + "," +
+            //     String(longitude) + "&key=AIzaSyAzkhf-ORo89KJxvc_A6rscoEbO3d-ByQM"), false);
+            // xmlHttp1.send(null);
+            // response1 = JSON.parse(xmlHttp1.responseText);
+            // var country = response1['results'][0]['address_components'][1]["long_name"];
+
+            var pos = {
+                lat: latitude,
+                lng: longitude - 1.1
+            }
+
+            var bounds = new google.maps.LatLngBounds();
+            map.fitBounds(bounds);
+            var listener = google.maps.event.addListener(map, "idle", function () {
+                if (map.getZoom() > 10) map.setZoom(10);
+                google.maps.event.removeListener(listener);
+            });
+
+            map.setCenter(pos);
+
+            viewBounds = map.getBounds();
+
+            // lowerLatBound = viewBounds["Za"]["i"] + 1;
+            // upperLatBound = viewBounds["Za"]["j"] - 1;
+            // lowerLonBound = viewBounds["Ua"]["i"] + 2;
+            // upperLonBound = viewBounds["Ua"]["j"] - 2;
+
+
+            lowerLatBound = viewBounds["Za"]["i"];
+            upperLatBound = viewBounds["Za"]["j"];
+            lowerLonBound = viewBounds["Ua"]["i"];
+            upperLonBound = viewBounds["Ua"]["j"];
+
+
+            //Update Safety Tips
+            var recommendations = [
+                "There is a very low risk of flooding in your area. You can go about your daily business safely!",
+
+                "The number of cases in your area is growing. There is no need to panic, but please respect the sanitary guidelines provided by your local authorities. If you happen to have symptoms, please avoid contact with other people, and consult a doctor immediately.",
+
+                "The number of cases in your area is very high. In order to contain the spread of the virus and help local authorities, please stay calm and avoid irrational behaviour."
+            ]
+
+            var riskLevel = [
+                "Risk level is LOW",
+                "Risk level is MANAGEABLE",
+                "Risk level is HIGH"
+            ]
+
+            function updateTips(discharge) {
+                if (discharge <= 1) {
+                    document.getElementById('safety-tips').innerHTML = recommendations[0]
+                    document.getElementById('risk-level').innerHTML = riskLevel[0]
+                } else if (discharge > 1 && discharge <= 100) {
+                    document.getElementById('safety-tips').innerHTML = recommendations[1]
+                    document.getElementById('risk-level').innerHTML = riskLevel[1]
+                } else {
+                    document.getElementById('safety-tips').innerHTML = recommendations[2]
+                    document.getElementById('risk-level').innerHTML = riskLevel[2]
+                }
+            }
+
+            var changed = false;
+            for (const i in listOfLatCoordinates) {
+
+                if (listOfLatCoordinates[i] > lowerLatBound && listOfLatCoordinates[i] < upperLatBound) {
+
+
+                    if (listOfLongCoordinates[i] > lowerLonBound && listOfLongCoordinates[i] < upperLonBound) {
+
+                        document.getElementById('numberOfDischarge').innerHTML = listOfDischarge[i];
+                        updateTips(listOfDischarge[i]);
+
+                        changed = true
+
+                        document.getElementById('forecast-day').innerHTML = "Region is currently flooded.";
+
+                    }
+                }
+            }
+
+            if (!changed) {
+                document.getElementById('numberOfDischarge').innerHTML = "Discharge data unavailable";
+                document.getElementById('forecast-day').innerHTML = "> 20 years";
+                updateTips(0);
+
+            }
+
+            google.maps.event.trigger(map, 'resize');
+
+        }
+    </script>
+
+    <script src="http://maps.google.com/maps/api/js?libraries=places"></script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_kX9Yu5AtlAxjsdTQ6feIoMZe4ihoKn8&callback=initMap&libraries=places">
+    </script>
+
+</body>
+
+</html>
