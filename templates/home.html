@@ -167,7 +167,44 @@
 
             </ol>
 
-            <h1>To learn more about this issue, please consult the following links:</h1>
+            <h2>After a flood</h2>
+            <ol>
+                <li>WHEN THE WATER SUBSIDES: You may re-enter your home if authorities allow it and it is safe to do so, preferably during the day when it will be easier to identify problems and hazards. When you arrive, take photos to document damage to your home. </li>
+                    <li>ELECTRICITY:
+                    Consult an electrician before reconnecting the electricity to your home.
+                    Consult an expert before reconnecting heating appliances. </li>
+                    <!-- <li>WATER
+                    If you have a personal well, you must assume that the water is undrinkable even if it appears clear and is odourless. Until you can determine whether your well water is safe to drink, boil it vigorously for one minute before drinking it, or drink bottled water.
+                    Assume that the water from the municipal waterworks is safe unless you receive a notice to the contrary from the municipal officials in the waterworks department. In case of doubt with respect to water colour or odour, contact municipal officials before drinking it.</li> -->
+                    <li>CLEANING
+                    Clean all rooms contaminated by the floodwater. Remove and discard all absorbent items from the water, such as gypsum board, fibreglass, carpeting, pressed wood, etc.
+                    Discard all foods that come into contact with floodwater. Make sure all food is wholesome before eating.
+                    Return all medications that come into contact with the floodwater to the pharmacy for safe disposal by the pharmacist.
+                    Sterilize contaminated cooking utensils with boiling water.
+                    Watch for the presence of mould (odours such as mould, dirt or alcohol, green or black spots on floors or walls), which can trigger health problems. If you have health problems, immediately consult a physician or request psychosocial assistance from a CLSC on your territory. </li>
+                     
+                    
+                    <!-- <li>PLUMBING
+                    Before using appliances that are connected to your plumbing system, make sure the municipal sewage system or your septic system is working properly.
+                    Clean or replace aerators and shower heads and their flexible hosing.
+                    Check and, if necessary, clean all orifices on sanitary appliances and make sure they are working properly (including inside the toilet tank and the sink and bathtub overflow drains.
+                    Clean all ditches and make sure all sump pumps are working.
+                    Locate, check and clean floor drains and anti-backflow devices.
+                    If necessary, have all anti-backflow devices inspected by a certified expert.
+                    Empty, clean and replace water softener filters, if necessary.  </li>
+                      -->
+                    
+                    <!-- <li>YARD
+                    Never touch power wires or equipment you find on the ground. Call  Hydro-Québec, at 1 800 790-2424, if you see a power line on the ground.
+                    Carefully remove all debris from your yard.
+                    Handle all waste materials in compliance with the standards in effect.
+                    FLOODED VEHICULES
+                    Never drive a flooded motor vehicle, including a motorcycle or recreational vehicle (RV, trailer). </li> -->
+                    <li>INSURANCE
+                    Take inventory of all damage the water has caused to your property and take supporting photographs. Notify your municipality and your insurance company. Keep all receipts and proofs of purchase for damaged goods for your claims.</li>
+            </ol>
+
+            <!-- <h1>To learn more about this issue, please consult the following links:</h1>
 
 
             <ul>
@@ -184,7 +221,7 @@
                         Public Health Services</a></li>
                 <li><a target="_blank" href="https://news.un.org/en/story/2020/02/1058381">United Nations Article</a>
                 </li>
-            </ul>
+            </ul> -->
         </div>
     </div>
 
@@ -444,6 +481,10 @@
 
 
             });
+
+            map.data.addListener('click', function(event) {
+   map.data.overrideStyle(event.feature, {fillColor: 'blue'});
+});
         }
 
         function getCircle(discharge) {
